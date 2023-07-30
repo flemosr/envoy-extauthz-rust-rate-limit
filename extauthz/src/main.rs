@@ -8,15 +8,19 @@ use envoy_types::ext_authz::v3::{
     CheckRequestExt, CheckResponseExt, DeniedHttpResponseBuilder, OkHttpResponseBuilder,
 };
 
+mod cache;
+
+use cache::{rate_limit, Cache};
+
 #[derive(Default)]
 struct MyServer;
 
-fn denied_response(status: Status) -> Result<Response<CheckResponse>, Status> {
+fn denied_response(status: Status, http_body: &str) -> Result<Response<CheckResponse>, Status> {
     let mut denied_http_response = DeniedHttpResponseBuilder::new();
     denied_http_response
         .set_http_status(HttpStatusCode::Forbidden)
         .add_header("downstream-header", "downstream-header-value", None, false)
-        .set_body("FORBIDDEN");
+        .set_body(http_body);
 
     let mut denied_response = CheckResponse::with_status(status);
     denied_response.set_http_response(denied_http_response);
@@ -40,8 +44,19 @@ impl Authorization for MyServer {
             .ok_or_else(|| Status::invalid_argument("client address not provided by envoy"))?;
 
         // Validate `client_address`
-        // ...
-        // Possible to implement some basic rate-limiting
+        
+        // Implementing some basic rate-limiting
+
+        let is_exceeding_rate = rate_limit::check_ip(client_address)
+            .await
+            .map_err(|_| Status::internal("internal error"))?;
+
+        if is_exceeding_rate {
+            return denied_response(
+                Status::resource_exhausted("too many requests"),
+                "TOO_MANY_REQUESTS",
+            );
+        }
 
         let client_headers = request
             .get_client_headers()
@@ -51,16 +66,18 @@ impl Authorization for MyServer {
             // Validate `authorization`
             // ...
             if authorization != "Bearer valid-token" {
-                return denied_response(Status::unauthenticated(
-                    "authorization token is not valid",
-                ));
+                return denied_response(
+                    Status::unauthenticated("authorization token is not valid"),
+                    "INVALID_TOKEN",
+                );
             }
 
             "client_id_value"
         } else {
-            return denied_response(Status::unauthenticated(
-                "authorization header not available",
-            ));
+            return denied_response(
+                Status::unauthenticated("authorization header not available"),
+                "WITHOUT AUTHORIZATION",
+            );
         };
 
         let path = client_headers
@@ -88,7 +105,16 @@ impl Authorization for MyServer {
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let server_port = env::var("SERVER_PORT").unwrap_or("50051".into());
+    println!("Connecting to cache...");
+
+    let redis_host = env::var("REDIS_HOST").expect("REDIS_HOST must be set");
+    let redis_password = env::var("REDIS_PASSWORD").expect("REDIS_PASSWORD must be set");
+
+    Cache::init(&redis_host, &redis_password).await?;
+
+    println!("Connected.");
+
+    let server_port = env::var("SERVER_PORT").expect("SERVER_PORT must be set");
     let addr = format!("0.0.0.0:{server_port}").parse().unwrap();
     let server = MyServer::default();
 

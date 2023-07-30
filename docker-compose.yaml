@@ -21,6 +21,8 @@ services:
     container_name: extauthz-rust.extauthz
     environment:
       - SERVER_PORT=${EXT_AUTHZ_PORT}
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - REDIS_HOST=redis:${REDIS_PORT}
     depends_on:
       - redis
     networks:
