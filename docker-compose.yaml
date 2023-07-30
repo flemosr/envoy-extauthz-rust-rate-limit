@@ -1,6 +1,15 @@
 version: "3.8"
 services:
 
+  redis:
+    image: redis:7.2-rc3-alpine3.18
+    container_name: extauthz-rust.redis
+    command: >
+      --requirepass ${REDIS_PASSWORD}
+      --port ${REDIS_PORT}
+    networks:
+      - redis_net
+
   extauthz:
     build:
       context: ./extauthz
@@ -12,7 +21,10 @@ services:
     container_name: extauthz-rust.extauthz
     environment:
       - SERVER_PORT=${EXT_AUTHZ_PORT}
+    depends_on:
+      - redis
     networks:
+      - redis_net
       - extauthz_net
 
   nginx:
@@ -54,6 +66,9 @@ services:
       - internet
 
 networks:
+  redis_net:
+    driver: bridge
+    internal: true
   extauthz_net:
     driver: bridge
     internal: true
