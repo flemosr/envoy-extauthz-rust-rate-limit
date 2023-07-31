@@ -43,9 +43,7 @@ impl Authorization for MyServer {
             .get_client_address()
             .ok_or_else(|| Status::invalid_argument("client address not provided by envoy"))?;
 
-        // Validate `client_address`
-        
-        // Implementing some basic rate-limiting
+        // Validate `client_address` with some basic rate-limiting
 
         let is_exceeding_rate = rate_limit::check_ip(client_address)
             .await
