@@ -1,6 +1,5 @@
 use core::fmt;
 use deadpool_redis::{Config, Runtime};
-use tokio::time::Duration;
 
 use tokio::sync::OnceCell;
 
@@ -15,14 +14,7 @@ impl Cache {
         let config = Config {
             url: Some(format!("redis://default:{password}@{host}/")),
             connection: None,
-            pool: Some(deadpool_redis::PoolConfig {
-                max_size: 50,
-                timeouts: deadpool_redis::Timeouts {
-                    wait: Some(Duration::from_secs(5)),
-                    create: Some(Duration::from_secs(5)),
-                    recycle: Some(Duration::from_secs(5)),
-                },
-            }),
+            pool: Some(deadpool_redis::PoolConfig::new(50)),
         };
 
         let cache = Cache(config.create_pool(Some(Runtime::Tokio1))?);

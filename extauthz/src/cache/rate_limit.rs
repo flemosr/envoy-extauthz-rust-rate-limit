@@ -4,7 +4,7 @@ use super::Cache;
 
 // Accept 1 request per 3 seconds
 const MAX_REQUESTS: u32 = 1;
-const RATE_INTERVAL: usize = 3;
+const RATE_INTERVAL: i64 = 3;
 
 /// Returns `true` if `ip` made more than `MAX_REQUESTS` requests in the last
 /// `RATE_INTERVAL` seconds.
