@@ -2,9 +2,10 @@
 
 This is an example showing how to implement an [Envoy External Authorization]
 gRPC Server written in Rust, implementing some basic rate-limiting using a
-[Redis] container. This repo is a fork of [envoy-extauthz-rust].
+[Redis] container. It builds upon [envoy-extauthz-rust]. If you want to start
+with a more bare-bones implementation, consider checking out that repository.
 
-In consists of an `envoy` service mapped to a localhost port, connected through
+Here, we create an `envoy` service mapped to a localhost port, connected through
 internal docker networks to an `extauthz` service, and to a `nginx` service that
 serves plain text. The `extauthz` service is also connected to a `redis`
 service.
