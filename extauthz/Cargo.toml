@@ -7,12 +7,12 @@ license = "MIT"
 publish = false
 
 [dependencies]
-deadpool-redis = "0.15"
-envoy-types = "0.4"
-redis = { version = "0.25", features = ["tokio-comp"] }
-tokio = { version = "1.37", features = [
+deadpool-redis = "0.16"
+envoy-types = "0.5"
+redis = { version = "0.26", features = ["tokio-comp"] }
+tokio = { version = "1.39", features = [
     "macros",
     "rt-multi-thread",
     "parking_lot",
 ] }
-tonic = "0.11"
+tonic = "0.12"
