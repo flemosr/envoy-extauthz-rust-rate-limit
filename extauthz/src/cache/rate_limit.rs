@@ -16,7 +16,7 @@ pub async fn check_ip(ip: &String) -> Result<bool, Box<dyn std::error::Error>> {
     if requests_n == 1 {
         // IP did not make a request in the last `RATE_INTERVAL` secs
         // Setup expiration for this interval limit
-        con.expire(ip, RATE_INTERVAL).await?;
+        con.expire::<_, ()>(ip, RATE_INTERVAL).await?;
     } else if requests_n > MAX_REQUESTS {
         // IP sent more than `MAX_REQUESTS`
         return Ok(true);
