@@ -1,9 +1,10 @@
 # Envoy External Authorization Server (ext_authz) in Rust, with Basic Rate-Limiting
 
 This is an example showing how to implement an [Envoy External Authorization]
-gRPC Server written in Rust, implementing some basic rate-limiting using a
-[Redis] container. It builds upon [envoy-extauthz-rust]. If you want to start
-with a more bare-bones implementation, consider checking out that repository.
+gRPC Server written in Rust using the [envoy-types] crate. It extends the
+[envoy-extauthz-rust] repository by adding a basic rate-limiting mechanism 
+that uses a [Redis] container. If you want to start with a more bare-bones
+implementation, consider checking out that repository.
 
 Here, we create an `envoy` service mapped to a localhost port, connected through
 internal docker networks to an `extauthz` service, and to a `nginx` service that
@@ -17,6 +18,7 @@ added to it. If not, `envoy` sends the `extauthz` denied response back to the
 client.
 
 [Envoy External Authorization]: https://www.envoyproxy.io/docs/envoy/latest/configuration/http/http_filters/ext_authz_filter
+[envoy-types]: https://crates.io/crates/envoy-types
 [Redis]: https://redis.io
 [envoy-extauthz-rust]: https://github.com/flemosr/envoy-extauthz-rust
 
@@ -120,7 +122,7 @@ The valid request log should be similar to:
 
 ```log
 ...
-extauthz-rust.nginx  | ENVOY-INTERNAL-IP - - [01/Feb/2024:14:44:23 +0000] "GET /?extauthz-query-param=extauthz-query-value HTTP/1.1" 200 22 "-" "curl/8.4.0" "CLIENT-IP" "extauthz-value"
+extauthz-rust.nginx  | ENVOY-INTERNAL-IP - - [01/Dec/2024:14:44:23 +0000] "GET /?extauthz-query-param=extauthz-query-value HTTP/1.1" 200 22 "-" "curl/8.7.1" "CLIENT-IP" "extauthz-value"
 ```
 
 ## License
