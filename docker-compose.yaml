@@ -1,7 +1,7 @@
 services:
 
   redis:
-    image: redis:7.2-rc3-alpine3.18
+    image: redis:7.4.1-bookworm
     container_name: extauthz-rust.redis
     command: >
       --requirepass ${REDIS_PASSWORD}
