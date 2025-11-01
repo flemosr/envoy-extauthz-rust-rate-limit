@@ -8,7 +8,7 @@ publish = false
 
 [dependencies]
 deadpool-redis = "0.22"
-envoy-types = "0.7.0"
+envoy-types = "0.7.1"
 redis = { version = "0.32", features = ["tokio-comp"] }
 tokio = { version = "1.47", features = [
     "macros",
