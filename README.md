@@ -1,36 +1,30 @@
 # Envoy External Authorization Server (ext_authz) in Rust, with Basic Rate-Limiting
 
-This is an example showing how to implement an [Envoy External Authorization]
-gRPC Server written in Rust using the [envoy-types] crate. It extends the
-[envoy-extauthz-rust] repository by adding a basic rate-limiting mechanism 
-that uses a [Redis] container. If you want to start with a more bare-bones
-implementation, consider checking out that repository.
+This is an example showing how to implement an
+[Envoy External Authorization](https://www.envoyproxy.io/docs/envoy/latest/configuration/http/http_filters/ext_authz_filter)
+gRPC Server written in Rust using the [envoy-types](https://crates.io/crates/envoy-types) crate. It
+extends the [envoy-extauthz-rust](https://github.com/flemosr/envoy-extauthz-rust) repository by
+adding a basic rate-limiting mechanism  that uses a [Redis](https://redis.io) container. If you want
+to start with a more bare-bones implementation, consider checking out that repository.
 
-Here, we create an `envoy` service mapped to a localhost port, connected through
-internal docker networks to an `extauthz` service, and to a `nginx` service that
-serves plain text. The `extauthz` service is also connected to a `redis`
-service.
+Here, we create an `envoy` service mapped to a localhost port, connected through internal docker
+networks to an `extauthz` service, and to a `nginx` service that serves plain text. The `extauthz`
+service is also connected to a `redis` service.
 
-When `envoy` receives a request, it checks its validity through the `extauthz`
-service. If the request is considered valid, it is sent to `nginx`,
-with any appended headers and query parameters that the `extauthz` service
-added to it. If not, `envoy` sends the `extauthz` denied response back to the
-client.
-
-[Envoy External Authorization]: https://www.envoyproxy.io/docs/envoy/latest/configuration/http/http_filters/ext_authz_filter
-[envoy-types]: https://crates.io/crates/envoy-types
-[Redis]: https://redis.io
-[envoy-extauthz-rust]: https://github.com/flemosr/envoy-extauthz-rust
+When `envoy` receives a request, it checks its validity through the `extauthz` service. If the
+request is considered valid, it is sent to `nginx`, with any appended headers and query parameters
+that the `extauthz` service added to it. If not, `envoy` sends the `extauthz` denied response back
+to the client.
 
 ## Run the Example
 
-To run this example, you must have `Docker` installed (with `docker compose`). 
-Instructions can be found [here](https://docs.docker.com/get-docker/).
+To run this example, you must have `Docker` installed (with `docker compose`). Instructions can be
+found [here](https://docs.docker.com/get-docker/).
 
 ### Setup Expected Environment Variables
 
-The `docker-compose` file expects a few `env` variables that need to be provided
-in order to run its services. An example configuration follows:
+The `docker-compose` file expects a few `env` variables that need to be provided in order to run its
+services. An example configuration follows:
 
 ```env
 DOCKER_REGISTRY=playground.local
@@ -66,16 +60,16 @@ Build and run `envoy` and the services it depends on.
 $ docker compose up -d --build envoy
 ```
 
-Check with `docker ps` if the four containers are running, and if the port
-10000 of the envoy container is mapped to the localhost port 3000, as expected
-from the example environment configuration.
+Check with `docker ps` if the four containers are running, and if the port 10000 of the envoy
+container is mapped to the localhost port 3000, as expected from the example environment
+configuration.
 
 ### Send Requests to Envoy
 
-Requests containing an "`Authorization`" header with value "`Bearer valid-token`"
-will be considered valid and, therefore, will reach the `nginx` service. Other
-requests will be blocked. Besides that, the client can only make 1 request per
-3 seconds. That is, you need to wait 3 seconds between requests.
+Requests containing an "`Authorization`" header with value "`Bearer valid-token`" will be considered
+valid and, therefore, will reach the `nginx` service. Other requests will be blocked. Besides that,
+the client can only make 1 request per 3 seconds. That is, you need to wait 3 seconds between
+requests.
 
 Making a valid request:
 
@@ -99,8 +93,7 @@ $ curl http://localhost:3000 -H "Authorization: Bearer invalid-token"
 INVALID_TOKEN
 ```
 
-If you wait less than 3 seconds to make another request, it will be denied, not
-going through auth:
+If you wait less than 3 seconds to make another request, it will be denied, not going through auth:
 
 ```bash
 # Waiting less than 3 seconds between requests
@@ -111,8 +104,8 @@ TOO_MANY_REQUESTS
 
 ### Check Nginx Logs
 
-Check if the headers and query parameters added by the `extauthz` service indeed
-reached the `nginx` service.
+Check if the headers and query parameters added by the `extauthz` service indeed reached the `nginx`
+service.
 
 ```console
 $ docker compose logs nginx
@@ -131,6 +124,5 @@ This project is licensed under the [MIT License](LICENSE).
 
 ## Contribution
 
-Unless you explicitly state otherwise, any contribution intentionally submitted
-for inclusion in this project by you, shall be licensed as MIT, without any
-additional terms or conditions.
+Unless you explicitly state otherwise, any contribution intentionally submitted for inclusion in
+this project by you, shall be licensed as MIT, without any additional terms or conditions.
